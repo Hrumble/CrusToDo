@@ -1,4 +1,5 @@
 use crate::task::Task;
+use core::task;
 use std::collections::HashMap;
 
 /* 
@@ -6,15 +7,15 @@ A todolist is a container for Tasks, so you can have multiple todo lists each wi
 tasks, reference each task via their ID, so HashMap id(u16) -> task (Task)
 */
 pub struct TodoList {
-    name : String,
+    pub name : String,
     tasks : HashMap<u16, Task>,
     id : u16,
 }
 
 impl TodoList {
-    pub fn new(list_name : String) -> Self {
+    pub fn new(list_name : &str) -> Self {
        Self {
-           name : list_name,
+           name : list_name.to_string(),
            tasks : HashMap::new(),
            id : 1,
        } 
@@ -36,14 +37,22 @@ impl TodoList {
         // If task exists, return error, otherwise insert the new task
         if self.task_exists(task_id) {
             Err(format!("A task with id {} already exists, failed to add", task_id))
-           } else {
+        } else {
             self.tasks.insert(*task_id, new_task);
             match self.tasks.get(task_id) {
                 Some(task) => Ok(task),
                 None => Err(String::from("An error occured when trying to add task")),
-               }  
+            }  
         }
     }
+    // Removes a task, if it fails, return error
+    pub fn remove_task(&mut self, task_id : &u16) -> Result<(), String>{
+        match self.tasks.remove(task_id) {
+            Some(_) => Ok(()),
+            None => Err(format!("Could not remove task with id {}, are you sure it exists?", task_id))
+        }
+    }
+
     // You can guess what this one does 
     pub fn mark_task_completed(&mut self, task_id : &u16, completed : bool) -> Result<(), String> {
         match self.tasks.get_mut(task_id) {

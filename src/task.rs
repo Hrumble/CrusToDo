@@ -19,7 +19,6 @@ impl Task {
             self.name,
             self.description,
             if self.completed {"✅"} else {"❌"},
-
         )
     }
 }
