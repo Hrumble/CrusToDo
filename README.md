@@ -23,4 +23,39 @@ Then cd into the directory and build it
 $ cd CrusToDo && cargo build --release
 ```
 
-The executable will located at: `./target/release/crustodo`
+The executable will be located at: `./target/release/crustodo`
+
+Crustodo will also create a file `crustodo.json` inside `$HOME/crustodo/crustodo.json`
+this file contains your actual tasks, you can modify them there, but it's not recommended as I didn't
+include any failsafe, and if the program detects an error in the file, it will reset it.
+# Usage
+
+You use crustodo from your terminal, you can:
+- Create lists
+- Create tasks inside those lists
+- Set tasks completed or todo
+- remove tasks
+*It's a todo list I didn't lie*
+
+the syntax is as follow
+```sh
+$ crustodo [TODOLIST_NAME|create] [set|add] <TASK_ID>
+```
+You can print the help screen at any time by running 
+```sh
+$ crustodo help
+```
+
+Some examples:
+```sh
+$ crustodo create groceries ; Creates a new crustodo list called groceries
+
+$ crustodo groceries ; displays all tasks inside the groceries list
+
+$ crustodo groceries add ; prompts the program to create a new task
+
+$ crustodo groceries set 2 complete ; marks the task with id=2 to complete
+
+$ crustodo groceries remove 2 ; removes the task with id=2
+```
+
