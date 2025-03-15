@@ -25,9 +25,9 @@ $ cd CrusToDo && cargo build --release
 
 The executable will be located at: `./target/release/crustodo`
 
-Crustodo will also create a file `crustodo.json` inside `$HOME/crustodo/crustodo.json`
-this file contains your actual tasks, you can modify them there, but it's not recommended as I didn't
-include any failsafe, and if the program detects an error in the file, it will reset it.
+Crustodo will also create a file `crustodo.json` the first time you run it inside `$HOME/crustodo/crustodo.json`.
+This file contains your actual tasks, you can modify them there, but it's not recommended as I didn't
+include any failsafe, and **if the program can't parse the file, it will reset it.**
 # Usage
 
 You use crustodo from your terminal, you can:
@@ -58,4 +58,12 @@ $ crustodo groceries set 2 complete ; marks the task with id=2 to complete
 
 $ crustodo groceries remove 2 ; removes the task with id=2
 ```
+# Personal thoughts 
 
+Creating the todolist logic in itself was pretty simple and straightforward, the two things I struggled most with are:
+- Reading and Writing to the file system
+- Error handling
+
+Coming from a Python background, you can guess these were pretty arduous tasks. As a personal note, I will never try to use TOML again for storing complicated data structures, JSON is and will always be my baby.
+
+Overall happy to have made an actual functioning program for once.
