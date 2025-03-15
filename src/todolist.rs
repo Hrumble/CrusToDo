@@ -8,9 +8,9 @@ tasks, reference each task via their ID, so HashMap id(u16) -> task (Task)
 */
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TodoList {
+    #[serde(flatten)]
+    pub tasks : HashMap<u16, Task>,
     pub name : String,
-    tasks : HashMap<u16, Task>,
-    id : u16,
 }
 
 impl TodoList {
@@ -18,7 +18,6 @@ impl TodoList {
        Self {
            name : list_name.to_string(),
            tasks : HashMap::new(),
-           id : 1,
        } 
     }
     // Simple function to check if task exists
@@ -28,7 +27,7 @@ impl TodoList {
     
     // Attemps to create a task with a particular ID, throws an error if the ID already exists
     // inside the todolist
-    pub fn create_task(&mut self, task_name : &str, task_definition : &str, task_id : &u16) -> Result<&Task, String> {
+    pub fn create_task(&mut self, task_name : &str, task_definition : &str, task_id : u16) -> Result<&Task, String> {
         // Creates task
         let new_task = Task {
             name : task_name.to_string(),
@@ -36,11 +35,11 @@ impl TodoList {
             completed : false,
            };
         // If task exists, return error, otherwise insert the new task
-        if self.task_exists(task_id) {
+        if self.task_exists(&task_id) {
             Err(format!("A task with id {} already exists, failed to add", task_id))
         } else {
-            self.tasks.insert(*task_id, new_task);
-            match self.tasks.get(task_id) {
+            self.tasks.insert(task_id, new_task);
+            match self.tasks.get(&task_id) {
                 Some(task) => Ok(task),
                 None => Err(String::from("An error occured when trying to add task")),
             }  

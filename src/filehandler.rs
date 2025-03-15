@@ -1,26 +1,26 @@
 use std::fs::{self, File};
+use std::option;
 use crate::ListManager;
 use std::{process::exit, env};
 use std::path::PathBuf;
 use toml;
 use std::io::Write;
 
-pub fn write_to_file(path : &PathBuf, listmanager : &ListManager){
+pub fn write_to_file(crustodo_file : &mut File, listmanager : &ListManager){
     let toml_string : String = toml::to_string(listmanager).expect("Error when calling to_string on list manager");
-    if fs::exists(path).unwrap() {
-        let mut file : File = fs::File::open(path).expect("Error when opening file");
-        let _ = file.write_all(toml_string.as_bytes());
-    } else {
-        let mut file : File = fs::File::create(path).expect("Error when opening file");
-        let _ = file.write_all(toml_string.as_bytes());
-    }
+    let _ = crustodo_file.write_all(toml_string.as_bytes());
 }
 
 pub fn read_from_file(path : &PathBuf) -> ListManager{
-   match fs::read_to_string(path) {
-       Ok(val) => toml::from_str(&val).unwrap(),
-       Err(_) => ListManager::new(),
-   }
+    let mut crustodo_path = path.clone(); 
+    crustodo_path.push("crustodo.toml");
+    match fs::read_to_string(crustodo_path) {
+        Ok(val) => toml::from_str(&val).unwrap(),
+        Err(e) => {
+            println!("{e}");
+            ListManager::new()
+        },
+    }
 
 }
 
@@ -49,7 +49,7 @@ pub fn get_storage_path() -> PathBuf {
     }
 }
 
-pub fn check_or_create_file(path : &PathBuf) {
+pub fn check_or_create_file(path : &PathBuf) -> File {
     let file_name : &str = "crustodo.toml";
     let mut new_path : PathBuf = path.clone();
     if !fs::exists(&new_path).expect("Could not check existence of list storage") {
@@ -58,8 +58,13 @@ pub fn check_or_create_file(path : &PathBuf) {
     }
 
     new_path.push(file_name);
-    if !fs::exists(&new_path).expect("Failed to check existence of necessary files") {
-        fs::File::create(new_path).expect("Failed to create necessary files");
+    if !fs::exists(&new_path).expect("Could not check existence of file") {
+        let crust_file : File = fs::File::create(new_path).expect("Failed to create necessary files");
         println!("Created crustodo.toml");
+        crust_file
+    } else {
+       let crust_file : File = File::options().read(true).write(true).open(&new_path).expect("Failed opening crustodo file");
+       crust_file
     }
+    
 }
