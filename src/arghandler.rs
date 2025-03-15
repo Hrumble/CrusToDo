@@ -94,12 +94,11 @@ pub fn handle_args(listmanager: &mut ListManager) -> Result<(), String> {
             
             // Mark task as completed (or todo)
             todo_list.mark_task_completed(&task_id, completed)?;
+            todo_list.print_task(&task_id)?;
             return Ok(()); // Return Ok(()) after completing the task
         }
     }
-    
-    // This should not be reached
-    return Err("Unexpected error occurred".to_string());
+    print_help(HelpScreens::Main)
 }
 
 #[derive(PartialEq)]
@@ -120,6 +119,17 @@ crustodo [TODOLIST_NAME|create] [set|add] <TASK_ID>
 list - lists all tasks in the todo list, or lists all todo lists
 set - sets the status (completed/uncomplete) of the task <TASK_ID>
 add - Adds a new task to the todo list
+
+Examples:
+$ crustodo create groceries ; Creates a new crustodo list called groceries
+
+$ crustodo groceries ; displays all tasks inside the groceries list
+
+$ crustodo groceries add ; prompts the program to create a new task
+
+$ crustodo groceries set 2 complete ; marks the task with id=2 to complete
+
+$ crustodo groceries remove 2 ; removes the task with id=2
         ");
     } else if screen == HelpScreens::CreateList {
         println!("
@@ -155,5 +165,5 @@ to get a list of all tasks and their id in a particular crustodo list.
 
             ");
     }
-    Err("Invalid input".to_string())
+    Err("Error : Invalid input".to_string())
 }

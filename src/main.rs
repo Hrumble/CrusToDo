@@ -6,7 +6,6 @@ mod arghandler;
 
 use std::path::PathBuf;
 use std::fs::File;
-use std::{env, process::exit};
 
 use listmanager::ListManager;
 
@@ -16,7 +15,10 @@ fn main() {
     let mut crustodo_file : File = filehandler::check_or_create_file(&storage_path);
     // Parse the toml and store it in a ListManager
 
-    arghandler::handle_args(&mut listmanager);
+    match arghandler::handle_args(&mut listmanager) {
+        Ok(_) => (),
+        Err(e) => eprintln!("{e}"),
+    }
     filehandler::write_to_file(&mut crustodo_file, &listmanager);
 }
 

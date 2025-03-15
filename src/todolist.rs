@@ -1,6 +1,6 @@
 use crate::task::Task;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, task};
 
 /* 
 A todolist is a container for Tasks, so you can have multiple todo lists each with their own
@@ -61,14 +61,17 @@ impl TodoList {
         
     }
 
-    //UI UX Functions
     pub fn print_task(&self, task_id : &u16) -> Result<(), String> {
-        match self.tasks.get(task_id) {
-            Some(task) => Ok(task.print()),
-            None => Err(format!("Task with id {} does not exist. Are you sure this is the correct todo list?", task_id)),
+        match self.tasks.get(task_id){
+            Some(task) => {
+                task.print();
+                Ok(())
+            },
+            None => Err(format!("Could not find task with id {}, are you sure it exists?", task_id))
         }
     }
 
+    //UI UX Functions
     pub fn print_list(&self) {
         if self.tasks.len() == 0{
             println!("
@@ -76,10 +79,21 @@ You have no tasks here, use:
 $ crustodo {} add
 to create a new one
             ", self.name);
+            return;
         }
+        println!("====❌ Todo====");
         for (id, task) in &self.tasks {
-            println!("--Task ID {}--", id);
-            task.print();
+            if !task.completed {
+                println!("--Task ID {}--", id);
+                task.print();
+            } 
+        }
+        println!("====✅ Completed====");
+        for (id, task) in &self.tasks {
+            if task.completed {
+                println!("--Task ID {}--", id);
+                task.print();
+            }
         }
     }
 }
