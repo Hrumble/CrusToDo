@@ -17,7 +17,7 @@ impl ListManager {
     }
     pub fn print_lists(&self){
         for (_, list) in &self.lists {
-            println!("📃 {}", list.name);
+            println!("📃 {} - {} tasks", list.name, list.tasks.len());
         }
     } 
     // creates a list, todo list 

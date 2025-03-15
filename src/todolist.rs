@@ -70,8 +70,15 @@ impl TodoList {
     }
 
     pub fn print_list(&self) {
+        if self.tasks.len() == 0{
+            println!("
+You have no tasks here, use: 
+$ crustodo {} add
+to create a new one
+            ", self.name);
+        }
         for (id, task) in &self.tasks {
-            println!("==============Task ID {}============", id);
+            println!("--Task ID {}--", id);
             task.print();
         }
     }

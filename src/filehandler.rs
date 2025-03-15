@@ -15,7 +15,9 @@ pub fn read_from_file(path : &PathBuf) -> ListManager{
     let mut crustodo_path = path.clone(); 
     crustodo_path.push("crustodo.json");
     match fs::read_to_string(crustodo_path) {
-        Ok(val) => serde_json::from_str(&val).unwrap(),
+        Ok(val) => serde_json::from_str(&val).unwrap_or_else(|_| {
+            ListManager::new()
+        }),
         Err(e) => {
             println!("{e}");
             ListManager::new()

@@ -15,13 +15,13 @@ impl Task {
     pub fn print(&self){
         println!(
             "
-            {}\n
-            Description: {}\n
-            Status: {}
+Name: {}
+Description: {}
+Status: {}
             ", 
             self.name,
             self.description,
-            if self.completed {"✅"} else {"❌"},
+            if self.completed {"✅ Completed"} else {"❌ Awaiting Completion"},
         )
     }
 }

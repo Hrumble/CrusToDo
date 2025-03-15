@@ -1,5 +1,5 @@
 use crate::todolist::TodoList;
-use crate::{exit, ListManager};
+use crate::ListManager;
 use std::process::exit;
 use std::env;
 
@@ -31,15 +31,24 @@ pub fn handle_args(listmanager : &mut ListManager) {
             println!("This Crustodolist does not exist");
             exit(1);
         }
+        let todo_list : &mut TodoList = listmanager.lists.get_mut(&args[1]).unwrap();
+        match args.get(3) {
+            Some(_) => (),
+            None => {
+                todo_list.print_list();
+                exit(1);
+            },
+        }
         if &args[2] == "add" {
            listmanager.create_task_ui(&args[1]); 
         } else if &args[2] == "remove" {
-            let mut todo_list : &mut TodoList = listmanager.lists.get_mut(&args[1]).unwrap(); 
+             
+            
             let task_id : u16 = match args[3].trim().parse() {
                 Ok(val) => val,
                 Err(e) => {
                     println!("{e}");
-                    
+                    exit(1)
                 }
             };
             todo_list.remove_task(&task_id).unwrap();
@@ -58,13 +67,13 @@ enum HelpScreens {
 fn print_help(screen : HelpScreens){
     if screen == HelpScreens::Main {
         println!("
-            Usage:
+Usage:
 
-            crustodo [TODOLIST_NAME|list|create] [set|add] <TASK_ID|TASK_NAME>
+crustodo [TODOLIST_NAME|list|create] [set|add] <TASK_ID>
 
-            list - lists all tasks in the todo list, or lists all todo lists
-            set - sets the status (completed/uncomplete) of the task <TASK_ID>
-            add - Adds a new task to the todo list
+list - lists all tasks in the todo list, or lists all todo lists
+set - sets the status (completed/uncomplete) of the task <TASK_ID>
+add - Adds a new task to the todo list
         ");
     }
     exit(1);
