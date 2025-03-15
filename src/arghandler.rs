@@ -5,17 +5,16 @@ use std::env;
 
 fn parse_args() -> Vec<String> {
     let args : Vec<String> = env::args().collect();
-    
-    if args.len() < 2 {
-        print_help(HelpScreens::Main);
-        
-    }
     args
 }
 
 pub fn handle_args(listmanager : &mut ListManager) {
     let args : Vec<String> = parse_args();
-    if &args[1] == "list" {
+    if args.len() < 2 {
+        listmanager.print_lists();
+        exit(1);
+    }
+    if &args[1] == "list"{
         listmanager.print_lists();
     } else if &args[1] == "create"{
         match args.get(2) {
@@ -26,13 +25,16 @@ pub fn handle_args(listmanager : &mut ListManager) {
                print_help(HelpScreens::CreateList); 
             }
         }
+    } else if &args[1] == "help" {
+        print_help(HelpScreens::Main);
+
     } else { 
         if !listmanager.lists.contains_key(&args[1]){
             println!("This Crustodolist does not exist");
             exit(1);
         }
         let todo_list : &mut TodoList = listmanager.lists.get_mut(&args[1]).unwrap();
-        match args.get(3) {
+        match args.get(2) {
             Some(_) => (),
             None => {
                 todo_list.print_list();
@@ -42,8 +44,6 @@ pub fn handle_args(listmanager : &mut ListManager) {
         if &args[2] == "add" {
            listmanager.create_task_ui(&args[1]); 
         } else if &args[2] == "remove" {
-             
-            
             let task_id : u16 = match args[3].trim().parse() {
                 Ok(val) => val,
                 Err(e) => {
@@ -51,7 +51,11 @@ pub fn handle_args(listmanager : &mut ListManager) {
                     exit(1)
                 }
             };
-            todo_list.remove_task(&task_id).unwrap();
+            match todo_list.remove_task(&task_id) {
+                Ok(_) => println!("Successfully removed task"),
+                Err(e) => eprintln!("{e}"),
+            }
+            
         }
         
     } 
