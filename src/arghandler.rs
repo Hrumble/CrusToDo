@@ -13,7 +13,7 @@ pub fn handle_args(listmanager: &mut ListManager) -> Result<(), String> {
     // Ensure we have at least 2 arguments
     if args.len() < 2 {
         listmanager.print_lists();
-        return Err("Invalid Input".to_string());
+        return Ok(());
     }
     
     // Handle the "list" command
@@ -36,6 +36,12 @@ pub fn handle_args(listmanager: &mut ListManager) -> Result<(), String> {
     // Handle the "help" command
     else if &args[1] == "help" {
         return print_help(HelpScreens::Main); // Properly propagate Result
+    } 
+    else if &args[1] == "remove" {
+        return match args.get(2) {
+            Some(str) => listmanager.remove_list(str),
+            None => Err("You need to provide a list name for the list to be removed".to_string()),
+        }
     } 
     else { 
         // Ensure the list exists before proceeding

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 use serde::{Deserialize, Serialize};
 use crate::{task::Task, todolist::TodoList};
 
@@ -44,6 +44,17 @@ $ crustodo create list_name
         } 
     }
 
+    pub fn remove_list(&mut self, list_name : &str) -> Result<(), String> {
+        match self.lists.remove(list_name) {
+             Some(_a) => {
+                println!("Successfully removed 📃{list_name}");
+                Ok(())
+             },
+             None => Err("This list does not exist, did you mispell it?".to_string()),
+         } 
+        
+    }
+
     pub fn create_task(&mut self, list_name : &str, task_name : &str, task_description : &str) -> Result<&Task, String> {
         match self.lists.get_mut(list_name) {
             Some(todo_list) => {
@@ -77,13 +88,6 @@ $ crustodo create list_name
                 todo_list.remove_task(task_id).unwrap();
             },
             None => {}
-        }
-    }
-
-    pub fn remove_list(&mut self, list_name : &str) -> Result<(), String> {
-        match self.lists.remove(list_name) {
-            Some(_) => Ok(()),
-            None => Err(format!("could not remove {}, are you sure it exists?", list_name)),
         }
     }
 }
