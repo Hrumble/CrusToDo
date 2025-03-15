@@ -120,7 +120,7 @@ fn print_help(screen : HelpScreens) -> Result<(), String>{
         println!("
 Usage:
 
-crustodo [TODOLIST_NAME|create] [set|add] <TASK_ID>
+crustodo [TODOLIST_NAME|create|remove] [set|add|TODOLIST_NAME] <TASK_ID>
 
 list - lists all tasks in the todo list, or lists all todo lists
 set - sets the status (completed/uncomplete) of the task <TASK_ID>
@@ -136,6 +136,8 @@ $ crustodo groceries add ; prompts the program to create a new task
 $ crustodo groceries set 2 complete ; marks the task with id=2 to complete
 
 $ crustodo groceries remove 2 ; removes the task with id=2
+
+$ crustodo remove groceries ; removes the entire list called 'groceries'
         ");
     } else if screen == HelpScreens::CreateList {
         println!("
