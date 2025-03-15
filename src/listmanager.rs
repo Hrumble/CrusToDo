@@ -16,6 +16,14 @@ impl ListManager {
         }
     }
     pub fn print_lists(&self){
+        if self.lists.len() < 1{
+            println!("
+You have no Crutodolists📃 created, to create one, use:
+$ crustodo create list_name
+");
+            return;
+        }
+
         for (_, list) in &self.lists {
             println!("📃 {} - {} tasks", list.name, list.tasks.len());
         }
@@ -28,7 +36,10 @@ impl ListManager {
         
         self.lists.insert(list_name.to_string(), TodoList::new(list_name));
         match self.lists.get(list_name){
-            Some(list) => Ok(list),
+            Some(list) => {
+                println!("Successfully created {list_name}📃");
+                Ok(list)
+            },
             None => Err(String::from("There was an error creating the list manager"))
         } 
     }
@@ -46,7 +57,7 @@ impl ListManager {
         }
     }
 
-    pub fn create_task_ui(&mut self, list_name : &str){
+    pub fn create_task_ui(&mut self, list_name : &str) -> Result<(), String>{
         println!("Task Name: ");
         let mut task_name : String = String::new();
         std::io::stdin().read_line(&mut task_name);
@@ -54,7 +65,10 @@ impl ListManager {
         let mut task_description : String = String::new();
         std::io::stdin().read_line(&mut task_description);
 
-        self.create_task(list_name, &task_name, &task_description);
+        match self.create_task(list_name, &task_name, &task_description) {
+            Ok(_) => Ok(()),
+            Err(e) => Err(e)
+        }
     }
 
     pub fn remove_task(&mut self, list_name : &str, task_id : &u16) {

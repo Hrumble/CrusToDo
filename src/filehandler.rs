@@ -8,6 +8,8 @@ use std::io::Write;
 
 pub fn write_to_file(crustodo_file : &mut File, listmanager : &ListManager){
     let json_string : String = serde_json::to_string_pretty(listmanager).expect("Error when calling to_string on list manager");
+    // clears the file and write to it
+    let _ = crustodo_file.set_len(0);
     let _ = crustodo_file.write_all(json_string.as_bytes());
 }
 

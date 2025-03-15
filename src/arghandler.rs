@@ -1,6 +1,5 @@
 use crate::todolist::TodoList;
 use crate::ListManager;
-use std::process::exit;
 use std::env;
 
 fn parse_args() -> Vec<String> {
@@ -8,57 +7,99 @@ fn parse_args() -> Vec<String> {
     args
 }
 
-pub fn handle_args(listmanager : &mut ListManager) {
-    let args : Vec<String> = parse_args();
+pub fn handle_args(listmanager: &mut ListManager) -> Result<(), String> {
+    let args: Vec<String> = parse_args();
+    
+    // Ensure we have at least 2 arguments
     if args.len() < 2 {
         listmanager.print_lists();
-        exit(1);
+        return Err("Invalid Input".to_string());
     }
-    if &args[1] == "list"{
+    
+    // Handle the "list" command
+    if &args[1] == "list" {
         listmanager.print_lists();
-    } else if &args[1] == "create"{
+        return Ok(()); // Return Ok(())
+    } 
+    // Handle the "create" command
+    else if &args[1] == "create" {
         match args.get(2) {
             Some(val) => {
-                listmanager.create_list(val).expect("Something went wrong");
+                listmanager.create_list(val)?;
+                return Ok(()); // Return Ok(())
             }
             None => {
-               print_help(HelpScreens::CreateList); 
+                return print_help(HelpScreens::CreateList); // Properly propagate Result
             }
         }
-    } else if &args[1] == "help" {
-        print_help(HelpScreens::Main);
-
-    } else { 
-        if !listmanager.lists.contains_key(&args[1]){
+    } 
+    // Handle the "help" command
+    else if &args[1] == "help" {
+        return print_help(HelpScreens::Main); // Properly propagate Result
+    } 
+    else { 
+        // Ensure the list exists before proceeding
+        if !listmanager.lists.contains_key(&args[1]) {
             println!("This Crustodolist does not exist");
-            exit(1);
+            return Err("Tried to reference an unexisting list".to_string());
         }
-        let todo_list : &mut TodoList = listmanager.lists.get_mut(&args[1]).unwrap();
+        
+        // Safely unwrap the TodoList by getting a mutable reference
+        let todo_list: &mut TodoList = listmanager.lists.get_mut(&args[1]).unwrap();
+        
         match args.get(2) {
             Some(_) => (),
             None => {
                 todo_list.print_list();
-                exit(1);
+                return Ok(()); // Return Ok(())
             },
         }
+        
+        // Handle the "add" command
         if &args[2] == "add" {
-           listmanager.create_task_ui(&args[1]); 
-        } else if &args[2] == "remove" {
-            let task_id : u16 = match args[3].trim().parse() {
+            return listmanager.create_task_ui(&args[1]);
+        } 
+        // Handle the "remove" command
+        else if &args[2] == "remove" {
+            let task_id: u16 = match args[3].trim().parse() {
                 Ok(val) => val,
-                Err(e) => {
-                    println!("{e}");
-                    exit(1)
+                Err(_) => {
+                    return Err("You need to enter a valid task ID".to_string());
                 }
             };
-            match todo_list.remove_task(&task_id) {
-                Ok(_) => println!("Successfully removed task"),
-                Err(e) => eprintln!("{e}"),
+            return todo_list.remove_task(&task_id); // Return the result of remove_task
+        } 
+        // Handle the "set" command
+        else if &args[2] == "set" {
+            if args.len() < 5 {
+                return print_help(HelpScreens::SetTask); // Properly propagate Result
             }
             
+            // Parse task ID
+            let task_id: u16 = match args[3].trim().parse() {
+                Ok(val) => val,
+                Err(_) => {
+                    return Err("You need to enter a valid task ID".to_string());
+                }
+            };
+
+            // Parse completion status
+            let completed: bool = match args[4].trim() {
+                "complete" => true,
+                "todo" => false,
+                _ => {
+                    return Err("Invalid completion status. Use 'complete' or 'todo'.".to_string());
+                }
+            };
+            
+            // Mark task as completed (or todo)
+            todo_list.mark_task_completed(&task_id, completed)?;
+            return Ok(()); // Return Ok(()) after completing the task
         }
-        
-    } 
+    }
+    
+    // This should not be reached
+    return Err("Unexpected error occurred".to_string());
 }
 
 #[derive(PartialEq)]
@@ -66,19 +107,53 @@ enum HelpScreens {
     Main,
     CreateList,
     RemoveTask,
+    SetTask,
 }
 
-fn print_help(screen : HelpScreens){
+fn print_help(screen : HelpScreens) -> Result<(), String>{
     if screen == HelpScreens::Main {
         println!("
 Usage:
 
-crustodo [TODOLIST_NAME|list|create] [set|add] <TASK_ID>
+crustodo [TODOLIST_NAME|create] [set|add] <TASK_ID>
 
 list - lists all tasks in the todo list, or lists all todo lists
 set - sets the status (completed/uncomplete) of the task <TASK_ID>
 add - Adds a new task to the todo list
         ");
+    } else if screen == HelpScreens::CreateList {
+        println!("
+To create a todo list use:
+$ crustodo create list_name
+            ");
+    } else if screen == HelpScreens::RemoveTask {
+        println!("
+To remove a task, use:
+$ crustodo <list_name> remove <task_id>
+
+Where <list_name> is the name of the crustodo list where the task is located,
+and <task_id> is the id of the task to be removed.
+
+You can use:
+$ crustodo <list_name>
+to get a list of all tasks and their id in a particular crustodo list.
+        ");
+    } else if screen == HelpScreens::SetTask {
+        println!("
+to set a task, use:
+$ crustodo <list_name> set complete|todo <task_id>
+
+Where <list_name> is the name of the crustodo list where the task is located,
+and <task_id> is the id of the task to be set.
+
+complete - sets the task to completed ✅
+todo - sets the task to pending/todo ❌
+
+You can use:
+$ crustodo <list_name>
+to get a list of all tasks and their id in a particular crustodo list.
+
+            ");
     }
-    exit(1);
+    Err("Invalid input".to_string())
 }
