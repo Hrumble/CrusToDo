@@ -8,7 +8,6 @@ tasks, reference each task via their ID, so HashMap id(u16) -> task (Task)
 */
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TodoList {
-    #[serde(flatten)]
     pub tasks : HashMap<u16, Task>,
     pub name : String,
 }

@@ -1,21 +1,21 @@
 use std::fs::{self, File};
+use serde::{Deserialize, Serialize};
 use std::option;
 use crate::ListManager;
 use std::{process::exit, env};
 use std::path::PathBuf;
-use toml;
 use std::io::Write;
 
 pub fn write_to_file(crustodo_file : &mut File, listmanager : &ListManager){
-    let toml_string : String = toml::to_string(listmanager).expect("Error when calling to_string on list manager");
-    let _ = crustodo_file.write_all(toml_string.as_bytes());
+    let json_string : String = serde_json::to_string_pretty(listmanager).expect("Error when calling to_string on list manager");
+    let _ = crustodo_file.write_all(json_string.as_bytes());
 }
 
 pub fn read_from_file(path : &PathBuf) -> ListManager{
     let mut crustodo_path = path.clone(); 
-    crustodo_path.push("crustodo.toml");
+    crustodo_path.push("crustodo.json");
     match fs::read_to_string(crustodo_path) {
-        Ok(val) => toml::from_str(&val).unwrap(),
+        Ok(val) => serde_json::from_str(&val).unwrap(),
         Err(e) => {
             println!("{e}");
             ListManager::new()
@@ -50,7 +50,7 @@ pub fn get_storage_path() -> PathBuf {
 }
 
 pub fn check_or_create_file(path : &PathBuf) -> File {
-    let file_name : &str = "crustodo.toml";
+    let file_name : &str = "crustodo.json";
     let mut new_path : PathBuf = path.clone();
     if !fs::exists(&new_path).expect("Could not check existence of list storage") {
         fs::create_dir(&new_path).expect("Failed to create necessary directories");
@@ -60,7 +60,7 @@ pub fn check_or_create_file(path : &PathBuf) -> File {
     new_path.push(file_name);
     if !fs::exists(&new_path).expect("Could not check existence of file") {
         let crust_file : File = fs::File::create(new_path).expect("Failed to create necessary files");
-        println!("Created crustodo.toml");
+        println!("Created crustodo.json");
         crust_file
     } else {
        let crust_file : File = File::options().read(true).write(true).open(&new_path).expect("Failed opening crustodo file");

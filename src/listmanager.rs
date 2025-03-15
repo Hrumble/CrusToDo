@@ -4,7 +4,6 @@ use crate::{task::Task, todolist::TodoList};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ListManager {
-    #[serde(flatten)]
     pub lists : HashMap<String, TodoList>,
     pub current_id : u16,
 }
@@ -26,7 +25,7 @@ impl ListManager {
         if self.lists.contains_key(list_name) {
             return Err(format!("Crustodo list with name {} already exists", list_name));
         }
-
+        
         self.lists.insert(list_name.to_string(), TodoList::new(list_name));
         match self.lists.get(list_name){
             Some(list) => Ok(list),
@@ -45,6 +44,17 @@ impl ListManager {
                 Err(format!("Crustodo list with name {} does not exist", list_name))
             }
         }
+    }
+
+    pub fn create_task_ui(&mut self, list_name : &str){
+        println!("Task Name: ");
+        let mut task_name : String = String::new();
+        std::io::stdin().read_line(&mut task_name);
+        println!("Task Description: ");
+        let mut task_description : String = String::new();
+        std::io::stdin().read_line(&mut task_description);
+
+        self.create_task(list_name, &task_name, &task_description);
     }
 
     pub fn remove_task(&mut self, list_name : &str, task_id : &u16) {

@@ -1,5 +1,5 @@
-use crate::task::Task;
-use crate::ListManager;
+use crate::todolist::TodoList;
+use crate::{exit, ListManager};
 use std::process::exit;
 use std::env;
 
@@ -8,7 +8,7 @@ fn parse_args() -> Vec<String> {
     
     if args.len() < 2 {
         print_help(HelpScreens::Main);
-        exit(1)
+        
     }
     args
 }
@@ -26,16 +26,25 @@ pub fn handle_args(listmanager : &mut ListManager) {
                print_help(HelpScreens::CreateList); 
             }
         }
-    } else {
-        let list : Option<Task> = listmanager.lists.get(&args[1]);
-        match list {
-            Some(list) => {
-                list.print_list();
-            },
-            None => {
-                println!("No list with this name has been found");
-            }
+    } else { 
+        if !listmanager.lists.contains_key(&args[1]){
+            println!("This Crustodolist does not exist");
+            exit(1);
         }
+        if &args[2] == "add" {
+           listmanager.create_task_ui(&args[1]); 
+        } else if &args[2] == "remove" {
+            let mut todo_list : &mut TodoList = listmanager.lists.get_mut(&args[1]).unwrap(); 
+            let task_id : u16 = match args[3].trim().parse() {
+                Ok(val) => val,
+                Err(e) => {
+                    println!("{e}");
+                    
+                }
+            };
+            todo_list.remove_task(&task_id).unwrap();
+        }
+        
     } 
 }
 
@@ -43,6 +52,7 @@ pub fn handle_args(listmanager : &mut ListManager) {
 enum HelpScreens {
     Main,
     CreateList,
+    RemoveTask,
 }
 
 fn print_help(screen : HelpScreens){
@@ -50,7 +60,7 @@ fn print_help(screen : HelpScreens){
         println!("
             Usage:
 
-            crustodo [TODOLIST_NAME|list|create] [list|set|add] <TASK_ID|TASK_NAME>
+            crustodo [TODOLIST_NAME|list|create] [set|add] <TASK_ID|TASK_NAME>
 
             list - lists all tasks in the todo list, or lists all todo lists
             set - sets the status (completed/uncomplete) of the task <TASK_ID>
