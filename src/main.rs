@@ -1,19 +1,22 @@
 mod todolist;
 mod task;
+mod filehandler;
 mod listmanager;
-
-use todolist::TodoList;
-use task::Task;
-use std::env::VarError;
-use std::error::Error;
-use std::fs;
 
 use std::path::PathBuf;
 use std::{env, process::exit};
 
+use listmanager::ListManager;
+
 fn main() {
-    check_for_storage_path();
-    parse_args();
+    let storage_path : PathBuf = filehandler::get_storage_path();
+    println!("{storage_path:?}");
+    filehandler::check_or_create_file(&storage_path);
+    // Parse the toml and store it in a ListManager
+    let mut listmanager : ListManager = filehandler::read_from_file(&storage_path);
+
+    handle_args(&mut listmanager);
+    filehandler::write_to_file(&storage_path, &listmanager);
 }
 
 fn parse_args() -> Vec<String> {
@@ -26,34 +29,11 @@ fn parse_args() -> Vec<String> {
     args
 }
 
-fn handle_args() {
+fn handle_args(listmanager : &mut ListManager) {
     let args : Vec<String> = parse_args();
-    if &args[1] == "init" {
-       println!() 
+    if &args[1] == "list" {
+        listmanager.print_lists();
     }
-}
-
-// This one checks if the environment variable CRUSTODO_PATH exists
-// if it doesn't then prompt user to create it, if another error, then exits program
-fn check_for_storage_path() -> PathBuf {
-     match env::var("CRUSTODO_PATH") {
-         Ok(val) => PathBuf::from(val),
-         Err(VarError::NotPresent) => {
-             println!("
-                 Your crustodo list path has not been set yet, this might be because
-                 this is the first time you've used crustodo, let's set it!
-
-                 Enter the path where you want to store your lists:
-             ");
-             let mut user_input : String = String::new();
-             std::io::stdin().read_line(&mut user_input).expect("Failed to read line");
-             return PathBuf::from(user_input);
-        }
-        Err(e) => {
-            eprintln!("There was an error reading the environment variable CRUSTODO_PATH : {e}");
-            exit(1);
-        }             
-     }
 }
 
 #[derive(PartialEq)]

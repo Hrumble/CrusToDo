@@ -1,11 +1,12 @@
 use crate::task::Task;
-use core::task;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /* 
 A todolist is a container for Tasks, so you can have multiple todo lists each with their own
 tasks, reference each task via their ID, so HashMap id(u16) -> task (Task)
 */
+#[derive(Debug, Deserialize, Serialize)]
 pub struct TodoList {
     pub name : String,
     tasks : HashMap<u16, Task>,

@@ -1,12 +1,18 @@
 use std::collections::HashMap;
-
+use serde::{Deserialize, Serialize};
 use crate::todolist::TodoList;
 
+#[derive(Debug, Deserialize, Serialize)]
 pub struct ListManager {
     pub lists : HashMap<String, TodoList>
 }
 
 impl ListManager {
+    pub fn new() -> Self{
+        Self {
+            lists : HashMap::new()
+        }
+    }
     pub fn print_lists(&self){
         for (_, list) in &self.lists {
             println!("📃 {}", list.name);
