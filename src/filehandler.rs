@@ -1,6 +1,4 @@
 use std::fs::{self, File};
-use serde::{Deserialize, Serialize};
-use std::option;
 use crate::ListManager;
 use std::{process::exit, env};
 use std::path::PathBuf;
